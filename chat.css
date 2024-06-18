@@ -1,0 +1,29 @@
+html, body {
+    margin: 0;
+    font-family: "Roboto";
+    font-size: 20px;
+}
+
+#chat {
+    width: 400px;
+    height: 600px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column-reverse;
+}
+
+#chat::-webkit-scrollbar {
+    display: none;
+}
+
+.username {
+    font-weight: bold;
+    padding-right: 1em;
+}
+
+.message {
+    display: inline-blo0ck;
+    position: relative;
+    color: white;
+    text-shadow: 1px 1px #000;
+}

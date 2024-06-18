@@ -42,5 +42,24 @@ const client = new tmi.Client({
 client.connect()
 
 client.on("message", (channel, tags, message, self) => {
-    console.log(`${tags.username}: ${message}`)
+    chat = document.getElementById("chat")
+
+    eMessageLine = document.createElement("div")
+    eMessageLine.className = "message-line"
+    eMessageLine.id = tags.id
+
+    eUsername = document.createElement("span")
+    eUsername.className = "username"
+    eUsername.style.color = tags.color
+    eUsername.innerText = tags.username
+
+    eMessage = document.createElement("span")
+    eMessage.className = "message"
+    eMessage.innerHTML = message
+
+    eMessageLine.append(eUsername)
+    eMessageLine.append(eMessage)
+    chat.append(eMessageLine)
+
+    chat.scrollTo(0, -chat.scrollHeight) 
 })
