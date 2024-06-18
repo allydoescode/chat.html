@@ -37,7 +37,8 @@ function getGlobalEmotes() {
     if (xhr.status === 200) {
         JSON.parse(xhr.response).forEach(emote => {
             globalEmotes[emote.code] = {
-                url: `https://cdn.betterttv.net/emote/${emote.id}/2x.webp`
+                url: `https://cdn.betterttv.net/emote/${emote.id}/2x.webp`,
+                mod: emote.modifier
             }
         })
     }
@@ -53,7 +54,8 @@ function getGlobalEmotes() {
     if (xhr.status === 200) {
         JSON.parse(xhr.response).emotes.forEach(emote => {
             globalEmotes[emote.name] = {
-                url: `https://cdn.7tv.app/emote/${emote.id}/2x.webp`
+                url: `https://cdn.7tv.app/emote/${emote.id}/2x.webp`,
+                mod: emote.flags === 1
             }
         })
     }
@@ -71,7 +73,8 @@ function getGlobalEmotes() {
         Object.keys(resp.sets).forEach(key => {
             resp.sets[key].emoticons.forEach(emote => {
                 globalEmotes[emote.name] = {
-                    url: `https://cdn.frankerfacez.com/emote/${emote.id}/2`
+                    url: `https://cdn.frankerfacez.com/emote/${emote.id}/2`,
+                    mod: emote.modifier
                 }
             })
         })
@@ -97,13 +100,15 @@ function getAvailableEmotes() {
 
         resp.channelEmotes.forEach(emote => {
             availableEmotes[emote.code] = {
-                url: `https://cdn.betterttv.net/emote/${emote.id}/2x.webp`
+                url: `https://cdn.betterttv.net/emote/${emote.id}/2x.webp`,
+                mod: emote.modifier
             }
         })
 
         resp.sharedEmotes.forEach(emote => {
             availableEmotes[emote.code] = {
-                url: `https://cdn.betterttv.net/emote/${emote.id}/2x.webp`
+                url: `https://cdn.betterttv.net/emote/${emote.id}/2x.webp`,
+                mod: emote.modifier
             }
         })
     }
@@ -119,7 +124,8 @@ function getAvailableEmotes() {
     if (xhr.status === 200) {
         JSON.parse(xhr.response).emote_set.emotes.forEach(emote => {
             availableEmotes[emote.name] = {
-                url: `https://cdn.7tv.app/emote/${emote.id}/2x.webp`
+                url: `https://cdn.7tv.app/emote/${emote.id}/2x.webp`,
+                mod: emote.flags === 1
             }
         })
     }
@@ -137,7 +143,8 @@ function getAvailableEmotes() {
         Object.keys(resp.sets).forEach(key => {
             resp.sets[key].emoticons.forEach(emote => {
                 availableEmotes[emote.name] = {
-                    url: `https://cdn.frankerfacez.com/emote/${emote.id}/2`
+                    url: `https://cdn.frankerfacez.com/emote/${emote.id}/2`,
+                    mod: emote.modifier
                 }
             })
         })
@@ -173,7 +180,8 @@ function parseMessage(message, tags) {
         }
 
         if (STORED_EMOTES.hasOwnProperty(word)) {
-            message = message.replace(word, `<img class="message-emote" alt="${STORED_EMOTES[word].host}" src="${STORED_EMOTES[word].url}" />`)
+            className = STORED_EMOTES[word].mod ? "message-emote-modifier" : ""
+            message = message.replace(word, `<img class="message-emote ${className}" src="${STORED_EMOTES[word].url}" />`)
         }
     })
 
