@@ -26,6 +26,131 @@ function getTwitchID() {
     if (xhr.status === 200) return JSON.parse(xhr.response).data[0].id
 }
 
+function getGlobalEmotes() {
+    globalEmotes = {}
+
+    // bttv
+    xhr = new XMLHttpRequest()
+    xhr.open("GET", "https://api.betterttv.net/3/cached/emotes/global", false)
+    xhr.send(null)
+
+    if (xhr.status === 200) {
+        JSON.parse(xhr.response).forEach(emote => {
+            globalEmotes[emote.code] = {
+                url: `https://cdn.betterttv.net/emote/${emote.id}/2x.webp`
+            }
+        })
+    }
+
+    len = Object.keys(globalEmotes).length
+    console.log(`Loaded ${len} betterttv global emotes...`)
+
+    // 7tv
+    xhr = new XMLHttpRequest()
+    xhr.open("GET", "https://7tv.io/v3/emote-sets/global", false)
+    xhr.send(null)
+
+    if (xhr.status === 200) {
+        JSON.parse(xhr.response).emotes.forEach(emote => {
+            globalEmotes[emote.name] = {
+                url: `https://cdn.7tv.app/emote/${emote.id}/2x.webp`
+            }
+        })
+    }
+
+    len = Object.keys(globalEmotes).length
+    console.log(`Loaded ${len} seventv global emotes...`)
+
+    // ffz
+    xhr = new XMLHttpRequest()
+    xhr.open("GET", "https://api.frankerfacez.com/v1/set/global", false)
+    xhr.send(null)
+
+    if (xhr.status === 200) {
+        resp = JSON.parse(xhr.response)
+        Object.keys(resp.sets).forEach(key => {
+            resp.sets[key].emoticons.forEach(emote => {
+                globalEmotes[emote.name] = {
+                    url: `https://cdn.frankerfacez.com/emote/${emote.id}/2`
+                }
+            })
+        })
+    }
+
+    len = Object.keys(globalEmotes).length
+    console.log(`Loaded ${len} frankerfacez global emotes...`)
+
+    return globalEmotes
+}
+
+function getAvailableEmotes() {
+    availableEmotes = {}
+    tid = getTwitchID(CHANNEL)
+
+    // bttv
+    xhr = new XMLHttpRequest()
+    xhr.open("GET", `https://api.betterttv.net/3/cached/users/twitch/${tid}`, false)
+    xhr.send(null)
+
+    if (xhr.status === 200) {
+        resp = JSON.parse(xhr.response)
+
+        resp.channelEmotes.forEach(emote => {
+            availableEmotes[emote.code] = {
+                url: `https://cdn.betterttv.net/emote/${emote.id}/2x.webp`
+            }
+        })
+
+        resp.sharedEmotes.forEach(emote => {
+            availableEmotes[emote.code] = {
+                url: `https://cdn.betterttv.net/emote/${emote.id}/2x.webp`
+            }
+        })
+    }
+
+    len = Object.keys(availableEmotes).length
+    console.log(`Loaded ${len} betterttv channel emotes...`)
+
+    // 7tv
+    xhr = new XMLHttpRequest()
+    xhr.open("GET", `https://7tv.io/v3/users/twitch/${tid}`, false)
+    xhr.send(null)
+
+    if (xhr.status === 200) {
+        JSON.parse(xhr.response).emote_set.emotes.forEach(emote => {
+            availableEmotes[emote.name] = {
+                url: `https://cdn.7tv.app/emote/${emote.id}/2x.webp`
+            }
+        })
+    }
+
+    len = Object.keys(availableEmotes).length
+    console.log(`Loaded ${len} seventv channel emotes...`)
+
+    // ffz
+    xhr = new XMLHttpRequest()
+    xhr.open("GET", `https://api.frankerfacez.com/v1/room/${CHANNEL}`, false)
+    xhr.send(null)
+
+    if (xhr.status === 200) {
+        resp = JSON.parse(xhr.response)
+        Object.keys(resp.sets).forEach(key => {
+            resp.sets[key].emoticons.forEach(emote => {
+                availableEmotes[emote.name] = {
+                    url: `https://cdn.frankerfacez.com/emote/${emote.id}/2`
+                }
+            })
+        })
+    }
+
+    len = Object.keys(availableEmotes).length
+    console.log(`Loaded ${len} frankerfacez channel emotes...`)
+
+    return availableEmotes
+}
+
+const STORED_EMOTES = {...getGlobalEmotes(), ...getAvailableEmotes()}
+
 function parseMessage(message, tags) {
     // don't parse user inputted html
     message = message.replace(/</gm, "&lt;")
@@ -45,6 +170,10 @@ function parseMessage(message, tags) {
     message.split(" ").forEach(word => {
         if (twitchEmotes.hasOwnProperty(word)) {
             message = message.replace(word, `<img class="message-emote" src="${twitchEmotes[word]}"/>`)
+        }
+
+        if (STORED_EMOTES.hasOwnProperty(word)) {
+            message = message.replace(word, `<img class="message-emote" alt="${STORED_EMOTES[word].host}" src="${STORED_EMOTES[word].url}" />`)
         }
     })
 
