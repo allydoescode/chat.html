@@ -26,6 +26,31 @@ function getTwitchID() {
     if (xhr.status === 200) return JSON.parse(xhr.response).data[0].id
 }
 
+function parseMessage(message, tags) {
+    // don't parse user inputted html
+    message = message.replace(/</gm, "&lt;")
+    message = message.replace(/>/gm, "&gt;")
+
+    // parse twitch emotes
+    twitchEmotes = {}
+    if (tags.emotes !== null) {
+        Object.keys(tags.emotes).forEach(emote => {
+            start = parseInt(tags.emotes[emote][0].split("-")[0])
+            end = parseInt(tags.emotes[emote][0].split("-")[1])
+            emoteName = message.substring(start, end + 1)
+            twitchEmotes[emoteName] = `https://static-cdn.jtvnw.net/emoticons/v2/${emote}/default/dark/3.0`
+        })
+    }
+
+    message.split(" ").forEach(word => {
+        if (twitchEmotes.hasOwnProperty(word)) {
+            message = message.replace(word, `<img class="message-emote" src="${twitchEmotes[word]}"/>`)
+        }
+    })
+
+    return message
+}
+
 const client = new tmi.Client({
     options: { debug: true },
     connection: {
@@ -55,7 +80,7 @@ client.on("message", (channel, tags, message, self) => {
 
     eMessage = document.createElement("span")
     eMessage.className = "message"
-    eMessage.innerHTML = message
+    eMessage.innerHTML = parseMessage(message, tags)
 
     eMessageLine.append(eUsername)
     eMessageLine.append(eMessage)
