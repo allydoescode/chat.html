@@ -225,3 +225,8 @@ client.on("message", (channel, tags, message, self) => {
 
     chat.scrollTo(0, -chat.scrollHeight) 
 })
+
+client.on("messagedeleted", (channel, username, deletedMessage, tags) => {
+    eMessageLine = document.getElementById(tags["target-msg-id"])
+    eMessageLine.style.display = "none"
+})
